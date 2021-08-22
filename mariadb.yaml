@@ -1,0 +1,35 @@
+- name: MariaDB
+  hosts: dbs
+  gather_facts: true
+  become: true
+
+  vars:
+    mysql_root_password: "SonarBangla_2021"
+
+  tasks:
+    - name: install mariadb
+      yum:
+        name:
+          - mariadb-server
+          - python3-PyMySQL
+        state: latest
+
+    - name: start mariadb
+      service:
+        name: mariadb
+        enabled: true
+        state: started
+
+    - name: ensure 3306 port is open on firewalld
+      firewalld:
+        service: mysql
+        permanent: true
+        state: enabled
+
+    - name: firewall reload
+      service:
+        name: firewalld
+        state: reloaded
+
+
+
