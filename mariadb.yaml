@@ -3,9 +3,6 @@
   gather_facts: true
   become: true
 
-  vars:
-    mysql_root_password: "SonarBangla_2021"
-
   tasks:
     - name: install mariadb
       yum:
