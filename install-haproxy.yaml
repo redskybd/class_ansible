@@ -1,0 +1,109 @@
+- name: HAProxy Deployment
+  hosts: haproxy
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: install required packages
+      yum:
+        name: ['gcc', 'pcre-devel', 'tar', 'make']
+        state: present
+
+    - name: Download Haproxy
+      get_url:
+        url: "http://www.haproxy.org/download/2.0/src/haproxy-2.0.7.tar.gz"
+        dest: "/opt/haproxy-2.0.7.tar.gz"
+        mode: '0755'
+
+    - name: Extract Haproxy Archive
+      unarchive:
+        src: "/opt/haproxy-2.0.7.tar.gz"
+        dest: /opt/
+        copy: false
+
+    - name: make, compile code
+      command: make TARGET=linux-glibc
+      args:
+        chdir: "/opt/haproxy-2.0.7"
+
+    - name: make install haproxy
+      command: make install
+      args:
+        chdir: "/opt/haproxy-2.0.7"
+
+    - name: HAproxy create directory1
+      file:
+        path: /etc/haproxy
+        state: directory
+
+    - name: HAproxy create directory2
+      file:
+        path: /var/lib/haproxy
+        state: directory
+
+    - name: Create stats file
+      file:
+        path: /var/lib/haproxy/stats
+        state: touch
+        mode: '0644'
+
+    - name: link binary file
+      file:
+        path: /usr/sbin/haproxy
+        src: /usr/local/sbin/haproxy
+        state: link
+        force: yes
+
+    - name: Copy init file
+      copy:
+        src: /opt/haproxy-2.0.7/examples/haproxy.init
+        dest: /etc/init.d/haproxy
+        remote_src: yes
+
+    - name: Changing perm of /etc/init.d/haproxy
+      file:
+        dest: /etc/init.d/haproxy
+        mode: '0755'
+
+    - name: Add group haproxy
+      group:
+        name: haproxy
+        state: present
+
+    - name: Add haproxy user
+      user:
+        name: haproxy
+        comment: "haproxy owner"
+        group: haproxy
+
+    - name: Reload systemd
+      command: systemctl daemon-reload
+
+    - name: copying haproxy config file
+      copy:
+        src: /root/playbooks/templates/haproxy.cfg
+        dest: /etc/haproxy/haproxy.cfg
+        owner: haproxy
+        group: haproxy
+        mode: '0644'
+
+    - name: Enabling haproxy
+      service:
+        name: haproxy
+        enabled: yes
+        state: restarted
+
+    - name: Restart Haproxy
+      service:
+        name: haproxy
+        state: restarted
+
+    - name: Remove build directory
+      file:
+        path: "/opt/haproxy-2.0.7"
+        state: absent
+
+    - name: Remove Archive
+      file:
+        path: "/opt/haproxy-2.0.7.tar.gz"
+        state: absent
