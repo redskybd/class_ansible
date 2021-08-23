@@ -93,6 +93,16 @@
         enabled: yes
         state: restarted
 
+    - name: add port 80
+      shell: "/bin/firewall-cmd --permanent --add-port=80/tcp"
+
+    - name: add port 443
+      shell: "/bin/firewall-cmd --permanent --add-port=443/tcp"
+
+    - name: add port 8181
+      shell: "/bin/firewall-cmd --permanent --add-port=8181/tcp"
+
+
     - name: Remove build directory
       file:
         path: "/opt/haproxy-2.0.7"
