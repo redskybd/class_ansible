@@ -102,6 +102,10 @@
     - name: add port 8181
       shell: "/bin/firewall-cmd --permanent --add-port=8181/tcp"
 
+    - name: firewall reload
+      service:
+        name: firewalld
+        state: reloaded
 
     - name: Remove build directory
       file:
