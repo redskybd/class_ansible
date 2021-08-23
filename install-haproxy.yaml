@@ -93,11 +93,6 @@
         enabled: yes
         state: restarted
 
-    - name: Restart Haproxy
-      service:
-        name: haproxy
-        state: restarted
-
     - name: Remove build directory
       file:
         path: "/opt/haproxy-2.0.7"
